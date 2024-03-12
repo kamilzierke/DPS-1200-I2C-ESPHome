@@ -11,7 +11,7 @@ class CustomPSUSensor : public PollingComponent {
   Sensor *internal_temp_sensor = new Sensor();
   Sensor *fan_speed_sensor = new Sensor();
 
-  CustomPSUSensor() : PollingComponent(1000) {}  // Polling interval: 15 seconds
+  CustomPSUSensor() : PollingComponent(1000) {}  // Polling interval: 1 second
 
   void setup() override {
     Wire.begin();
