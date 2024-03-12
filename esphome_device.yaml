@@ -1,0 +1,173 @@
+substitutions:
+  device_name: "esphome-web"
+  friendly_device_name: "PSU HSTNS-PL28"
+  
+
+esphome:
+  name: $device_name
+  friendly_name: $friendly_device_name
+  platform: ESP8266
+  board: esp12e
+  includes:
+    - custom_psu_sensor.h
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+logger:
+  level: debug
+debug:
+  update_interval: 5s
+
+api:
+ota:
+captive_portal:
+time:
+  - platform: homeassistant
+    id: homeassistant_time
+web_server:
+  port: 80
+  include_internal: true
+
+
+font:
+  - file: "tahoma.ttf"
+    id: tahoma
+    size: 10
+i2c:
+  sda: GPIO4
+  scl: GPIO5
+  frequency: 10kHz
+
+
+text_sensor:
+  - platform: template
+    name: Uptime Human Readable
+    id: uptime_human
+    icon: mdi:clock-start
+  - platform: wifi_info
+    ip_address:
+      name: ESP IP Address
+      id: ESP_IP
+    ssid:
+      name: ESP Connected SSID
+      id: ESP_SSID
+    bssid:
+      name: ESP Connected BSSID
+    mac_address:
+      name: ESP Mac Wifi Address
+
+  - platform: debug
+    device:
+      name: "Device Info"
+    reset_reason:
+      name: "Reset Reason"
+
+sensor:
+  - platform: debug
+    free:
+      name: "Heap Free"
+    fragmentation:
+      name: "Heap Fragmentation"
+    block:
+      name: "Heap Max Block"
+    loop_time:
+      name: "Loop Time"
+    
+
+
+  - platform: uptime
+    name: Uptime Sensor
+    id: uptime_sensor
+    update_interval: 15s
+    on_raw_value:
+      then:
+        - text_sensor.template.publish:
+            id: uptime_human
+            state: !lambda |-
+              int seconds = round(id(uptime_sensor).raw_state);
+              int days = seconds / (24 * 3600);
+              seconds = seconds % (24 * 3600);
+              int hours = seconds / 3600;
+              seconds = seconds % 3600;
+              int minutes = seconds /  60;
+              seconds = seconds % 60;
+              return (
+                (days ? to_string(days) + "d " : "") +
+                (hours ? to_string(hours) + "h " : "") +
+                (minutes ? to_string(minutes) + "m " : "") +
+                (to_string(seconds) + "s")
+              ).c_str();      
+
+  - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
+    name: "WiFi Signal dB"
+    id: wifi_signal_db
+    update_interval: 15s
+    entity_category: "diagnostic"
+
+  - platform: copy # Reports the WiFi signal strength in %
+    source_id: wifi_signal_db
+    name: "WiFi Signal Percent"
+    id: wifi_signal_percent
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    entity_category: "diagnostic"
+
+
+
+  - platform: custom
+    lambda: |-
+      auto custom_psu_sensor = new CustomPSUSensor();
+      App.register_component(custom_psu_sensor);
+      return {custom_psu_sensor->grid_voltage_sensor, custom_psu_sensor->grid_current_sensor,
+              custom_psu_sensor->output_voltage_sensor, custom_psu_sensor->output_current_sensor,
+              custom_psu_sensor->internal_temp_sensor, custom_psu_sensor->fan_speed_sensor};
+    sensors:
+      - name: "Grid Voltage"
+        unit_of_measurement: V
+        accuracy_decimals: 2
+        id: grid_voltage_sensor
+      - name: "Grid Current"
+        unit_of_measurement: A
+        accuracy_decimals: 2
+        id: grid_current_sensor
+      - name: "Output Voltage"
+        unit_of_measurement: V
+        accuracy_decimals: 2
+        id: output_voltage_sensor
+      - name: "Output Current"
+        unit_of_measurement: A
+        accuracy_decimals: 2
+        id: output_current_sensor
+      - name: "Internal Temperature"
+        unit_of_measurement: "°C"
+        accuracy_decimals: 2
+        id: internal_temp_sensor
+      - name: "Fan Speed"
+        unit_of_measurement: RPM
+        accuracy_decimals: 0
+        id: fan_speed_sensor
+
+
+
+
+display:
+  - platform: ssd1306_i2c
+    model: "SSD1306 128x32"
+    address: 0x3C
+    lambda: |-
+      it.printf(0, 0, id(tahoma), "%s / %.0f%% / %s", id(ESP_IP).state.c_str(), id(wifi_signal_percent).state, id(uptime_human).state.c_str());
+      it.printf(0, 10, id(tahoma), "I: %.2fV - %.2fA",id(grid_voltage_sensor).state,id(grid_current_sensor).state);
+      it.printf(0, 20, id(tahoma), "O: %.2fV - %.2fA",id(output_voltage_sensor).state, id(output_current_sensor).state);
+      it.printf(86, 10, id(tahoma), "%.2f°C", id(internal_temp_sensor).state);
+      it.printf(86, 20, id(tahoma), "%iRPM", (int)id(fan_speed_sensor).state);
+
+
+      
+switch:
+  - platform: gpio
+    name: "PS_ON Control"
+    inverted: false
+    pin: GPIO14
+    id: ps_on_control
+    restore_mode: ALWAYS_OFF  
