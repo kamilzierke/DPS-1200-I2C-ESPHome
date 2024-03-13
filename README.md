@@ -1,10 +1,13 @@
 **DPS-1200-I2C custom component for ESPHome**
 
 Tested on:
-- HSTNS-PR28 (eff. 94%, 460W, +12V 38.3A, +12VSB 2.5A)
-- HSTNS-PL28 (eff. 94%, 460W, +12V 38.3A, +12VSB 2.5A)
-- HSTNS-PD28 (DPS-460MB)
-- HSTNS-PD29 (DPS-750AB-3, eff. 94%, 750W, +12V 62.5A, +12VSB 2.5A)
+| Model       | Descr          | Efficiency | Power | +12V | +12V standby |
+|-------------|----------------|-------------|-----|------|--------|
+| HSTNS-PR28  |                | 94%         | 460W| 38.3A| 2.5A   |
+| HSTNS-PL28  |                | 94%         | 460W| 38.3A| 2.5A   |
+| HSTNS-PD28  | DPS-460MB      |             |     |      |        |
+| HSTNS-PD29  | DPS-750AB-3    | 94%         | 750W| 62.5A| 2.5A   |
+
 
 
 
