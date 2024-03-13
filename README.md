@@ -1,12 +1,14 @@
-DPS-1200-I2C custom component for ESPHome
+**DPS-1200-I2C custom component for ESPHome**
 
 Tested on:
-HSTNS-PR28
-HSTNS-PL28
-HSTNS-PD28 (DPS-460MB)
-HSTNS-PD29 (DPS-750AB-3)
+- HSTNS-PR28
+- HSTNS-PL28
+- HSTNS-PD28 (DPS-460MB)
+- HSTNS-PD29 (DPS-750AB-3)
 
-Might need I2C slave address change according to your PSU.
+
+
+_Might need I2C slave address change according to your PSU._
 
 
 
