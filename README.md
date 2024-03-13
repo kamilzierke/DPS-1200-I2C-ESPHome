@@ -1,5 +1,9 @@
 **DPS-1200-I2C custom component for ESPHome**
 
+![obraz](https://github.com/kamilzierke/DPS-1200-I2C-ESPHome/assets/67487992/a7504742-c5da-463a-bba0-a8b1531ba038)
+
+
+
 Tested on:
 | Model       | Descr          | Efficiency | Power | +12V | +12V standby |
 |-------------|----------------|-------------|-----|------|--------|
